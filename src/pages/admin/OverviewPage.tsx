@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getPublicMenuUrl } from '../../lib/qr';
+import { getPublicMenuUrl, isPrivateAiStudioDevOrigin } from '../../lib/qr';
 import { getErrorMessage } from '../../lib/supabase';
 import { listCategories } from '../../services/categoryService';
 import { listProducts } from '../../services/productService';
@@ -189,15 +189,25 @@ export function OverviewPage() {
               {copied ? <Check className="h-3.5 w-3.5 text-[#15803D]" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Copied' : 'Copy'}
             </button>
-            <a
-              href={menuUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
-            >
-              <span>Open</span>
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
+            {isPrivateAiStudioDevOrigin(menuUrl) ? (
+              <Link
+                to={`/menu/${encodeURIComponent(restaurant.slug)}`}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
+              >
+                <span>Open</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            ) : (
+              <a
+                href={menuUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
+              >
+                <span>Open</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
         </div>
 

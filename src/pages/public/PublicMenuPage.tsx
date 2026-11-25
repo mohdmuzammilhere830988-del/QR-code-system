@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { AlertCircle, RefreshCw, UtensilsCrossed } from 'lucide-react';
 import { getErrorMessage, isSupabaseConfigured } from '../../lib/supabase';
 import { sanitizeSafeHttpUrl } from '../../lib/validation';
@@ -10,13 +10,17 @@ import { ProductImage } from '../../components/ui/ProductImage';
 
 interface ThemeTokens {
   pageBg: string;
-  headerBg: string;
+  heroBg: string;
+  heroGlow: string;
   navBg: string;
   cardBg: string;
+  cardShadow: string;
+  imageBackdrop: string;
   border: string;
   headingText: string;
   bodyText: string;
   mutedText: string;
+  accentText: string;
   activeTab: string;
   inactiveTab: string;
   darkImageSurface: boolean;
@@ -24,41 +28,56 @@ interface ThemeTokens {
 
 const THEMES: Record<ThemePreference, ThemeTokens> = {
   editorial_light: {
-    pageBg: 'bg-[#F8F7F4]',
-    headerBg: 'bg-[#F8F7F4]',
-    navBg: 'bg-[#F8F7F4]/95',
+    pageBg: 'bg-[#F7F5F0]',
+    heroBg: 'bg-gradient-to-b from-[#EFECE4] via-[#F5F3EC] to-[#F7F5F0]',
+    heroGlow:
+      'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(27, 67, 50, 0.08), transparent 70%)',
+    navBg: 'bg-[#F7F5F0]/90',
     cardBg: 'bg-white',
-    border: 'border-[#E6E4DF]',
-    headingText: 'text-zinc-900',
-    bodyText: 'text-zinc-700',
-    mutedText: 'text-zinc-500',
-    activeTab: 'bg-[#1B4332] text-white',
-    inactiveTab: 'text-zinc-600 hover:text-zinc-900 hover:bg-black/[0.04]',
+    cardShadow: 'shadow-[0_4px_20px_-6px_rgba(24,24,27,0.06)] hover:shadow-[0_12px_28px_-8px_rgba(24,24,27,0.12)]',
+    imageBackdrop: 'bg-gradient-to-b from-[#F4F1EA] to-[#ECE8DF]',
+    border: 'border-[#E5E0D5]',
+    headingText: 'text-[#18181B]',
+    bodyText: 'text-[#3F3F46]',
+    mutedText: 'text-[#71717A]',
+    accentText: 'text-[#1B4332]',
+    activeTab: 'bg-[#1B4332] text-white shadow-xs',
+    inactiveTab: 'text-[#52525B] hover:text-[#18181B] hover:bg-black/[0.04]',
     darkImageSurface: false,
   },
   noir_bistro: {
-    pageBg: 'bg-[#111315]',
-    headerBg: 'bg-[#111315]',
-    navBg: 'bg-[#111315]/95',
-    cardBg: 'bg-[#181B1F]',
+    pageBg: 'bg-[#0E1012]',
+    heroBg: 'bg-gradient-to-b from-[#171A1E] via-[#121417] to-[#0E1012]',
+    heroGlow:
+      'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(212, 163, 115, 0.12), transparent 70%)',
+    navBg: 'bg-[#0E1012]/90',
+    cardBg: 'bg-[#16191D]',
+    cardShadow: 'shadow-[0_6px_24px_-6px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_32px_-8px_rgba(0,0,0,0.65)]',
+    imageBackdrop: 'bg-gradient-to-b from-[#1E2228] to-[#171A1E]',
     border: 'border-white/10',
-    headingText: 'text-[#F4F4F0]',
-    bodyText: 'text-zinc-300',
-    mutedText: 'text-zinc-400',
-    activeTab: 'bg-[#D4A373] text-[#111315]',
-    inactiveTab: 'text-zinc-400 hover:text-white hover:bg-white/[0.06]',
+    headingText: 'text-[#F5F3EE]',
+    bodyText: 'text-[#D4D4D8]',
+    mutedText: 'text-[#A1A1AA]',
+    accentText: 'text-[#D4A373]',
+    activeTab: 'bg-[#D4A373] text-[#111315] shadow-xs',
+    inactiveTab: 'text-[#A1A1AA] hover:text-white hover:bg-white/[0.06]',
     darkImageSurface: true,
   },
   botanical_sage: {
-    pageBg: 'bg-[#F2F5F2]',
-    headerBg: 'bg-[#F2F5F2]',
-    navBg: 'bg-[#F2F5F2]/95',
+    pageBg: 'bg-[#F0F4F0]',
+    heroBg: 'bg-gradient-to-b from-[#E3EBE3] via-[#ECF1EC] to-[#F0F4F0]',
+    heroGlow:
+      'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(27, 67, 50, 0.11), transparent 70%)',
+    navBg: 'bg-[#F0F4F0]/90',
     cardBg: 'bg-white',
-    border: 'border-[#DCE3DC]',
+    cardShadow: 'shadow-[0_4px_20px_-6px_rgba(20,38,28,0.06)] hover:shadow-[0_12px_28px_-8px_rgba(20,38,28,0.12)]',
+    imageBackdrop: 'bg-gradient-to-b from-[#EDF2ED] to-[#E3EAE3]',
+    border: 'border-[#D5E0D5]',
     headingText: 'text-[#14261C]',
     bodyText: 'text-[#2D4236]',
     mutedText: 'text-[#5A6E61]',
-    activeTab: 'bg-[#1B4332] text-white',
+    accentText: 'text-[#1B4332]',
+    activeTab: 'bg-[#1B4332] text-white shadow-xs',
     inactiveTab: 'text-[#42574A] hover:text-[#14261C] hover:bg-[#1B4332]/[0.06]',
     darkImageSurface: false,
   },
@@ -115,14 +134,12 @@ export function PublicMenuPage() {
     loadMenu();
   }, [loadMenu]);
 
-  // Update document title cleanly for restaurant guests
   useEffect(() => {
     if (menuData?.restaurant.name) {
       document.title = `${menuData.restaurant.name} — Menu`;
     }
   }, [menuData]);
 
-  // Observe category sections to sync active category tab while scrolling
   useEffect(() => {
     if (!menuData || menuData.categories.length === 0) return;
 
@@ -156,19 +173,19 @@ export function PublicMenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F7F4] px-4 py-10 sm:px-8">
-        <div className="mx-auto max-w-5xl space-y-8">
-          <div className="flex flex-col items-center space-y-3">
-            <div className="h-16 w-16 animate-pulse rounded-2xl bg-zinc-200" />
-            <div className="h-7 w-56 animate-pulse rounded-lg bg-zinc-200" />
-            <div className="h-4 w-72 animate-pulse rounded-lg bg-zinc-200" />
+      <div className="min-h-screen bg-[#F7F5F0] px-4 py-12 sm:px-8">
+        <div className="mx-auto max-w-5xl space-y-10">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="h-16 w-16 animate-pulse rounded-2xl bg-[#E5E0D5]" />
+            <div className="h-9 w-64 animate-pulse rounded-lg bg-[#E5E0D5]" />
+            <div className="h-4 w-80 animate-pulse rounded-lg bg-[#E5E0D5]" />
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="rounded-2xl border border-[#E6E4DF] bg-white p-4">
-                <div className="h-48 animate-pulse rounded-xl bg-zinc-100" />
-                <div className="mt-4 h-5 w-2/3 animate-pulse rounded bg-zinc-200" />
-                <div className="mt-2 h-4 w-1/3 animate-pulse rounded bg-zinc-200" />
+              <div key={i} className="rounded-2xl border border-[#E5E0D5] bg-white p-4">
+                <div className="h-52 animate-pulse rounded-xl bg-[#F2EFE8]" />
+                <div className="mt-4 h-5 w-2/3 animate-pulse rounded bg-[#E5E0D5]" />
+                <div className="mt-2 h-4 w-1/3 animate-pulse rounded bg-[#E5E0D5]" />
               </div>
             ))}
           </div>
@@ -179,8 +196,8 @@ export function PublicMenuPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8F7F4] px-4 py-12">
-        <div className="w-full max-w-md rounded-2xl border border-[#E6E4DF] bg-white p-8 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F5F0] px-4 py-12">
+        <div className="w-full max-w-md rounded-3xl border border-[#E5E0D5] bg-white p-8 text-center shadow-sm">
           <AlertCircle className="mx-auto h-8 w-8 text-zinc-500" />
           <h1 className="mt-4 font-display text-xl font-semibold text-zinc-900">
             Unable to Load Menu
@@ -201,8 +218,8 @@ export function PublicMenuPage() {
 
   if (notFound || !menuData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8F7F4] px-4 py-12">
-        <div className="w-full max-w-md rounded-2xl border border-[#E6E4DF] bg-white p-8 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F5F0] px-4 py-12">
+        <div className="w-full max-w-md rounded-3xl border border-[#E5E0D5] bg-white p-8 text-center shadow-sm">
           <UtensilsCrossed className="mx-auto h-8 w-8 text-zinc-400" strokeWidth={1.5} />
           <h1 className="mt-4 font-display text-xl font-semibold text-zinc-900">
             Menu Unavailable
@@ -221,12 +238,24 @@ export function PublicMenuPage() {
 
   return (
     <div className={`min-h-screen ${theme.pageBg} ${theme.headingText}`}>
-      {/* Restaurant Identity Header */}
-      <header className={`${theme.headerBg} border-b ${theme.border} px-4 py-7 sm:px-8 sm:py-10`}>
-        <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
-          {safeLogo && (
+      {/* Editorial Hospitality Masthead */}
+      <header className={`relative overflow-hidden border-b ${theme.border} ${theme.heroBg}`}>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: theme.heroGlow }}
+        />
+
+        <motion.div
+          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="relative mx-auto flex max-w-5xl flex-col items-center px-4 py-10 text-center sm:px-8 sm:py-14"
+        >
+          {/* Logo or Subtle Architectural Crest */}
+          {safeLogo ? (
             <div
-              className={`mb-4 flex h-20 w-24 items-center justify-center overflow-hidden rounded-2xl border p-2 ${theme.cardBg} ${theme.border}`}
+              className={`mb-5 flex h-24 w-28 items-center justify-center overflow-hidden rounded-2xl border p-2.5 shadow-sm ${theme.cardBg} ${theme.border}`}
             >
               <img
                 src={safeLogo}
@@ -235,16 +264,46 @@ export function PublicMenuPage() {
                 className="max-h-full max-w-full object-contain"
               />
             </div>
+          ) : (
+            <div
+              className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border ${theme.cardBg} ${theme.border} ${theme.accentText} shadow-xs`}
+            >
+              <UtensilsCrossed className="h-5 w-5" strokeWidth={1.6} />
+            </div>
           )}
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+
+          <h1 className="max-w-3xl font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
             {restaurant.name}
           </h1>
-          {restaurant.description && (
-            <p className={`mt-2.5 max-w-xl text-sm leading-relaxed ${theme.bodyText}`}>
+
+          {/* Fine Editorial Ornament Rule */}
+          <div className="my-4 flex items-center gap-3">
+            <span className={`h-px w-12 border-t ${theme.border}`} />
+            <span className={`h-1.5 w-1.5 rotate-45 border ${theme.border}`} />
+            <span className={`h-px w-12 border-t ${theme.border}`} />
+          </div>
+
+          {restaurant.description ? (
+            <p className={`max-w-xl text-sm leading-relaxed sm:text-base ${theme.bodyText}`}>
               {restaurant.description}
             </p>
+          ) : (
+            <p className={`text-sm ${theme.mutedText}`}>
+              Digital Menu
+            </p>
           )}
-        </div>
+
+          {/* Quiet Menu Count Summary (unboxed typography) */}
+          {totalActiveProducts > 0 && (
+            <p className={`mt-4 text-xs font-medium tracking-wide ${theme.mutedText}`}>
+              <span className="font-mono tabular-nums">{totalActiveProducts}</span>{' '}
+              {totalActiveProducts === 1 ? 'selection' : 'selections'}
+              <span aria-hidden="true"> · </span>
+              <span className="font-mono tabular-nums">{categories.length}</span>{' '}
+              {categories.length === 1 ? 'section' : 'sections'}
+            </p>
+          )}
+        </motion.div>
       </header>
 
       {/* Compact Sticky Category Navigation (<= 15% mobile viewport height) */}
@@ -253,17 +312,17 @@ export function PublicMenuPage() {
           aria-label="Menu categories"
           className={`sticky top-0 z-20 border-b ${theme.border} ${theme.navBg} backdrop-blur-md`}
         >
-          <div className="no-scrollbar mx-auto flex max-w-5xl items-center gap-1.5 overflow-x-auto px-4 py-2.5 sm:px-8">
+          <div className="no-scrollbar mx-auto flex max-w-5xl items-center justify-start gap-1.5 overflow-x-auto px-4 py-2.5 sm:justify-center sm:px-8">
             {categories.map(({ category }) => {
               const id = category?.id ?? 'uncategorized';
-              const label = category?.name ?? 'More Selections';
+              const label = category?.name ?? 'Menu Selections';
               const isSelected = activeSectionId === id;
               return (
                 <button
                   key={id}
                   type="button"
                   onClick={() => scrollToCategory(id)}
-                  className={`min-h-[40px] rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  className={`min-h-[40px] rounded-xl px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                     isSelected ? theme.activeTab : theme.inactiveTab
                   }`}
                 >
@@ -275,21 +334,26 @@ export function PublicMenuPage() {
         </nav>
       )}
 
-      {/* Menu Sections */}
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8 sm:py-10">
+      {/* Main Menu Showcase */}
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-8 sm:py-12">
         {totalActiveProducts === 0 ? (
-          <div className={`rounded-2xl border ${theme.border} ${theme.cardBg} px-6 py-14 text-center`}>
+          <div
+            className={`rounded-3xl border ${theme.border} ${theme.cardBg} px-6 py-16 text-center shadow-xs`}
+          >
             <UtensilsCrossed className={`mx-auto h-8 w-8 ${theme.mutedText}`} strokeWidth={1.5} />
-            <h2 className="mt-4 font-display text-xl font-semibold">Menu Coming Soon</h2>
+            <h2 className="mt-4 font-display text-2xl font-semibold">Menu Coming Soon</h2>
             <p className={`mt-2 text-sm ${theme.mutedText}`}>
               Our menu is currently being prepared. Please check back shortly.
             </p>
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-14">
             {categories.map(({ category, products }) => {
               const sectionId = category?.id ?? 'uncategorized';
-              const sectionTitle = category?.name ?? 'More Selections';
+              const sectionTitle = category?.name ?? 'Menu Selections';
+              const isSingleFeature = products.length === 1;
+              const isTwoColumn = products.length === 2;
+
               return (
                 <section
                   key={sectionId}
@@ -300,48 +364,102 @@ export function PublicMenuPage() {
                   }}
                   className="scroll-mt-20"
                 >
-                  <div className={`border-b ${theme.border} pb-3`}>
-                    <h2 className="font-display text-2xl font-semibold tracking-tight">
-                      {sectionTitle}
-                    </h2>
-                    {category?.description && (
-                      <p className={`mt-1 text-sm ${theme.mutedText}`}>{category.description}</p>
-                    )}
+                  {/* Category Heading */}
+                  <div className={`flex flex-wrap items-baseline justify-between gap-2 border-b ${theme.border} pb-3.5`}>
+                    <div>
+                      <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+                        {sectionTitle}
+                      </h2>
+                      {category?.description && (
+                        <p className={`mt-1 text-sm ${theme.mutedText}`}>{category.description}</p>
+                      )}
+                    </div>
+                    <span className={`font-mono text-xs tabular-nums ${theme.mutedText}`}>
+                      {products.length} {products.length === 1 ? 'item' : 'items'}
+                    </span>
                   </div>
 
-                  <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {products.map((product) => (
-                      <article
-                        key={product.id}
-                        className={`flex flex-col overflow-hidden rounded-2xl border ${theme.border} ${theme.cardBg} p-3.5 transition-transform duration-200 hover:-translate-y-0.5`}
-                      >
-                        {/* Uncropped full-visibility product photography */}
-                        <ProductImage
-                          src={product.image_url}
-                          alt={product.name}
-                          darkSurface={theme.darkImageSurface}
-                          containerClassName="h-52 w-full sm:h-56"
-                        />
-
-                        <div className="flex flex-1 flex-col pt-3.5">
-                          <div className="flex items-start justify-between gap-3">
-                            <h3 className="text-base font-semibold leading-snug">
-                              {product.name}
-                            </h3>
-                            <span className="shrink-0 font-mono text-sm font-semibold tabular-nums">
-                              {formatPrice(product.price, restaurant.currency)}
-                            </span>
+                  {/* Smart Responsive Grid: Signature feature layout for 1 item, balanced 2-col or 3-col for multiple */}
+                  {isSingleFeature ? (
+                    <div className="mt-6">
+                      {products.map((product) => (
+                        <article
+                          key={product.id}
+                          className={`grid overflow-hidden rounded-3xl border ${theme.border} ${theme.cardBg} ${theme.cardShadow} transition-all duration-200 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]`}
+                        >
+                          <div className={`p-4 sm:p-5 ${theme.imageBackdrop}`}>
+                            <ProductImage
+                              src={product.image_url}
+                              alt={product.name}
+                              darkSurface={theme.darkImageSurface}
+                              containerClassName="h-64 w-full border-0 bg-transparent p-2 sm:h-72"
+                            />
+                          </div>
+                          <div className="flex flex-col justify-center p-6 sm:p-8">
+                            <div className="flex items-baseline justify-between gap-4">
+                              <h3 className="font-display text-2xl font-semibold leading-snug">
+                                {product.name}
+                              </h3>
+                              <span
+                                className={`shrink-0 font-mono text-lg font-semibold tabular-nums ${theme.accentText}`}
+                              >
+                                {formatPrice(product.price, restaurant.currency)}
+                              </span>
+                            </div>
+                            {product.description && (
+                              <p className={`mt-3 text-sm leading-relaxed sm:text-base ${theme.bodyText}`}>
+                                {product.description}
+                              </p>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div
+                      className={`mt-6 grid gap-6 ${
+                        isTwoColumn
+                          ? 'sm:grid-cols-2'
+                          : 'sm:grid-cols-2 lg:grid-cols-3'
+                      }`}
+                    >
+                      {products.map((product) => (
+                        <article
+                          key={product.id}
+                          className={`group flex flex-col overflow-hidden rounded-3xl border ${theme.border} ${theme.cardBg} ${theme.cardShadow} transition-all duration-200 hover:-translate-y-0.5`}
+                        >
+                          {/* Uncropped full-visibility dish photography stage */}
+                          <div className={`p-3.5 ${theme.imageBackdrop}`}>
+                            <ProductImage
+                              src={product.image_url}
+                              alt={product.name}
+                              darkSurface={theme.darkImageSurface}
+                              containerClassName="h-52 w-full border-0 bg-transparent p-1.5 sm:h-56"
+                            />
                           </div>
 
-                          {product.description && (
-                            <p className={`mt-1.5 text-sm leading-relaxed ${theme.mutedText}`}>
-                              {product.description}
-                            </p>
-                          )}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
+                          <div className="flex flex-1 flex-col p-5">
+                            <div className="flex items-baseline justify-between gap-3">
+                              <h3 className="font-display text-lg font-semibold leading-snug">
+                                {product.name}
+                              </h3>
+                              <span
+                                className={`shrink-0 font-mono text-base font-semibold tabular-nums ${theme.accentText}`}
+                              >
+                                {formatPrice(product.price, restaurant.currency)}
+                              </span>
+                            </div>
+
+                            {product.description && (
+                              <p className={`mt-2 text-sm leading-relaxed ${theme.mutedText}`}>
+                                {product.description}
+                              </p>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
                 </section>
               );
             })}
@@ -349,26 +467,33 @@ export function PublicMenuPage() {
         )}
       </main>
 
-      {/* Quiet Optional Restaurant Contact Footer */}
-      {(restaurant.address || restaurant.contact_phone || restaurant.contact_email) && (
-        <footer className={`mt-10 border-t ${theme.border} px-4 py-8 sm:px-8`}>
-          <div className={`mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-xs ${theme.mutedText}`}>
-            {restaurant.address && <span>{restaurant.address}</span>}
-            {restaurant.contact_phone && (
-              <>
-                {restaurant.address && <span aria-hidden="true">·</span>}
-                <span className="font-mono">{restaurant.contact_phone}</span>
-              </>
-            )}
-            {restaurant.contact_email && (
-              <>
-                {(restaurant.address || restaurant.contact_phone) && <span aria-hidden="true">·</span>}
-                <span>{restaurant.contact_email}</span>
-              </>
-            )}
-          </div>
-        </footer>
-      )}
+      {/* Hospitality Footer */}
+      <footer className={`mt-12 border-t ${theme.border} px-4 py-9 sm:px-8`}>
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-center">
+          <p className="font-display text-base font-semibold">{restaurant.name}</p>
+          {(restaurant.address || restaurant.contact_phone || restaurant.contact_email) && (
+            <div
+              className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs ${theme.mutedText}`}
+            >
+              {restaurant.address && <span>{restaurant.address}</span>}
+              {restaurant.contact_phone && (
+                <>
+                  {restaurant.address && <span aria-hidden="true">·</span>}
+                  <span className="font-mono">{restaurant.contact_phone}</span>
+                </>
+              )}
+              {restaurant.contact_email && (
+                <>
+                  {(restaurant.address || restaurant.contact_phone) && (
+                    <span aria-hidden="true">·</span>
+                  )}
+                  <span>{restaurant.contact_email}</span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }

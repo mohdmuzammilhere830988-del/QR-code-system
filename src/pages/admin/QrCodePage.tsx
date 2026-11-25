@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   Check,
@@ -42,11 +43,6 @@ export function QrCodePage() {
   const [copied, setCopied] = useState(false);
 
   const menuUrl = restaurant ? getPublicMenuUrl(restaurant.slug, baseOrigin) : '';
-  const localPreviewUrl =
-    restaurant && typeof window !== 'undefined'
-      ? `${window.location.origin}/menu/${encodeURIComponent(restaurant.slug)}`
-      : menuUrl;
-
   const safeLogoUrl = sanitizeSafeHttpUrl(restaurant?.logo_url);
   const isPrivatePreviewUrl = isPrivateAiStudioDevOrigin(baseOrigin);
   const sharedSuggestion =
@@ -175,7 +171,7 @@ export function QrCodePage() {
 
   return (
     <PageTransition className="space-y-6">
-      <div className="no-print grid gap-6 lg:grid-cols-[380px_1fr]">
+      <div className="no-print grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* QR Preview Card */}
         <div className="flex flex-col items-center rounded-2xl border border-[#E6E4DF] bg-white p-6 text-center">
           <div className="flex aspect-square w-full max-w-[290px] items-center justify-center rounded-2xl border border-[#E6E4DF] bg-white p-4">
@@ -220,7 +216,7 @@ export function QrCodePage() {
         </div>
 
         {/* Controls & Export Details */}
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {isPrivatePreviewUrl && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
               <div className="flex items-start gap-3">
@@ -246,15 +242,13 @@ export function QrCodePage() {
                         Switch QR to Shared URL (ais-pre)
                       </button>
                     )}
-                    <a
-                      href={localPreviewUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      to={`/menu/${encodeURIComponent(restaurant.slug)}`}
                       className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#1B4332] px-3 text-xs font-medium text-white hover:bg-[#143326]"
                     >
                       <span>Test Menu in This Browser</span>
                       <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -323,15 +317,25 @@ export function QrCodePage() {
                 )}
                 {copied ? 'Copied' : 'Copy URL'}
               </button>
-              <a
-                href={localPreviewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
-              >
-                <span>Open Menu</span>
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+              {isPrivatePreviewUrl ? (
+                <Link
+                  to={`/menu/${encodeURIComponent(restaurant.slug)}`}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
+                >
+                  <span>Open Menu</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              ) : (
+                <a
+                  href={menuUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E6E4DF] bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap shrink-0"
+                >
+                  <span>Open Menu</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
             </div>
 
             {/* Export Buttons */}
