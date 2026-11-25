@@ -1,0 +1,6 @@
+{
+  "name": "CarteQR — Restaurant Digital Menu Platform",
+  "description": "Production-ready restaurant digital QR menu management system with Supabase authentication, PostgreSQL persistence, Storage image uploads, and a universal QR menu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
